@@ -13,6 +13,7 @@ import numpy as np
 # для конфигурации gpu
 from tensorflow.compat.v1 import ConfigProto
 from tensorflow.compat.v1 import InteractiveSession
+from tensorflow import keras
 # настраиваем работу с GPU, для CPU эта часть не нужна
 config = ConfigProto()
 config.gpu_options.per_process_gpu_memory_fraction = 0.7
