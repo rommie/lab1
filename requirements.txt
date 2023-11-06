@@ -3,8 +3,8 @@ requests==2.23.0
 Flask-Bootstrap==3.3.7.1 
 Flask-WTF== 1.0.0
 Pillow==6.2.2 
-tensorflow==2.5.0
-Keras==2.3.1 
+#tensorflow==2.5.0
+#Keras==2.3.1 
 lxml==4.9.3
 numpy~=1.19.5
 opencv-python~=4.5
