@@ -5,6 +5,8 @@ before_install:
   - chmod +x ./flaskapp/st.sh 
 install:
   - pip3 install -r requirements.txt 
+  - pip3 install --upgrade jinja2
+  - pip3 list
 script:
   - cd flaskapp 
   - ./st.sh
