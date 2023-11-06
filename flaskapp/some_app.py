@@ -21,11 +21,10 @@ from noise_elimination import color_distribution, apply_gaussian_blur, generate_
 
 app = Flask(__name__)
 
-SECRET_KEY = 'fafrafrgagfqSDefE'
-app.config['SECRET_KEY'] = SECRET_KEY
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['RECAPTCHA_USE_SSL'] = False
-app.config['RECAPTCHA_PUBLIC_KEY'] = '6LePd-YoAAAAAMno9r8SIpAcwB_eSzAnKdz2SLLP'
-app.config['RECAPTCHA_PRIVATE_KEY'] = '6LePd-YoAAAAAAcz-taXpd29T4v2nI7SueWnOvF6'
+app.config['RECAPTCHA_PUBLIC_KEY'] = os.getenv('RECAPTCHA_PUBLIC_KEY')
+app.config['RECAPTCHA_PRIVATE_KEY'] = os.getenv('RECAPTCHA_PRIVATE_KEY')
 app.config['RECAPTCHA_OPTIONS'] = {'theme': 'white'}
 bootstrap = Bootstrap(app)
 
