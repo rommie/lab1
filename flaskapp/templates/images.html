@@ -1,0 +1,65 @@
+<!--{% extends "bootstrap/base.html" %}-->
+{% import "bootstrap/wtf.html" as wtf %}
+<!-- задаем заголовок страницы -->
+{% block title %}This is an page{% endblock %}
+<!-- блок body -->
+{% block content %}
+<div class="container">
+    <h1>Image bluring (Task variation 1)</h1>
+    <div class="form-group">
+        <label for="method">Select Blurring Method</label>
+        <select class="form-control" id="method" name="method">
+            <option value="gaussian">Gaussian Blur</option>
+            <option value="median">Median Blur</option>
+        </select>
+    </div>
+{{ wtf.quick_form(form, method='post', enctype="multipart/form-data", action="bluring", button_map={'submit':'primary'}) }}
+{% if image %}
+<div class="col">
+<h3>Source image</h3>
+<div class="row justify-content-center">
+<div class="col-md-6">
+<img src={{image}} class="img-rounded img-responsive img-fluid" alt="Source image"/>
+</div>
+</div>
+{% else %}
+<p> There is no source image</p>
+{% endif %}
+
+{% if smoothed_image %}
+<h3>Result image</h3>
+<div class="row justify-content-center">
+<div class="col-md-6">
+
+<img src={{smoothed_image}} class="img-rounded img-responsive img-fluid" alt="Result image"/>
+</div>
+</div>
+{% else %}
+<p> There is no result image</p>
+{% endif %}
+
+{% if color_histogram %}
+<h3>Colors distribution in source image</h3>
+<div class="row justify-content-center">
+<div class="col-md-6">
+<img src={{color_histogram}} class="img-rounded img-responsive img-fluid" alt="Colors distribution"/>
+</div>
+</div>
+{% else %}
+<p> There is no colors distribution graph</p>
+{% endif %}
+
+{% if noise_histogram %}
+<h3>Noise distribution in source image</h3>
+<div class="row justify-content-center">
+<div class="col-md-6">
+<img src={{noise_histogram}} class="img-rounded img-responsive img-fluid" alt="Noise distribution"/>
+</div>
+</div>
+{% else %}
+<p> There is no noise distribution graph</p>
+{% endif %}
+</div>
+</div>
+
+{% endblock %}
