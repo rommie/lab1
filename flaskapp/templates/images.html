@@ -6,13 +6,6 @@
 {% block content %}
 <div class="container">
     <h1>Image bluring (Task variation 1)</h1>
-    <div class="form-group">
-        <label for="method">Select Blurring Method</label>
-        <select class="form-control" id="method" name="method">
-            <option value="gaussian">Gaussian Blur</option>
-            <option value="median">Median Blur</option>
-        </select>
-    </div>
 {{ wtf.quick_form(form, method='post', enctype="multipart/form-data", action="bluring", button_map={'submit':'primary'}) }}
 {% if image %}
 <div class="col">

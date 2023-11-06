@@ -1,8 +1,7 @@
 from flask import Flask
 from flask import render_template
 from flask_wtf import FlaskForm,RecaptchaField
-from wtforms import StringField, SubmitField, TextAreaField
-from wtforms.validators import DataRequired
+from wtforms import StringField, SubmitField, TextAreaField, SelectField
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from flask_bootstrap import Bootstrap
 from werkzeug.utils import secure_filename
@@ -20,6 +19,7 @@ import cv2
 from noise_elimination import color_distribution, apply_gaussian_blur, generate_noise_histogram, apply_median_blur
 
 app = Flask(__name__)
+
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['RECAPTCHA_USE_SSL'] = False
@@ -54,26 +54,26 @@ def data_to():
 
 
 class NetForm(FlaskForm):
-    #openid = StringField('openid', validators = [DataRequired()])
+    method = SelectField('Select Blurring Method', choices=[('gaussian', 'Gaussian Blur'), ('median', 'Median Blur')])
     upload = FileField('Load image', validators=[
         FileRequired(),
         FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')])
     recaptcha = RecaptchaField()
     submit = SubmitField('send')
 
-@app.route("/net",methods=['GET', 'POST'])
-def net():
-    form = NetForm()
-    filename=None
-    neurodic = {}
-    if form.validate_on_submit():
-        filename = os.path.join('./static', secure_filename(form.upload.data.filename))
-        fcount, fimage = neuronet.read_image_files(10,'./static')
-        decode = neuronet.getresult(fimage)
-        for elem in decode:
-            neurodic[elem[0][1]] = elem[0][2]
-        form.upload.data.save(filename)
-    return render_template('net.html',form=form,image_name=filename,neurodic=neurodic)
+#@app.route("/net",methods=['GET', 'POST'])
+#def net():
+#    form = NetForm()
+#    filename=None
+#    neurodic = {}
+#    if form.validate_on_submit():
+#        filename = os.path.join('./static', secure_filename(form.upload.data.filename))
+#        fcount, fimage = neuronet.read_image_files(10,'./static')
+#        decode = neuronet.getresult(fimage)
+#        for elem in decode:
+#            neurodic[elem[0][1]] = elem[0][2]
+#        form.upload.data.save(filename)
+#    return render_template('net.html',form=form,image_name=filename,neurodic=neurodic)
 
 @app.route("/apinet",methods=['GET', 'POST'])
 def apinet():
@@ -122,11 +122,11 @@ def bluring():
         filename = os.path.join(img_proc_dir, secure_filename(form.upload.data.filename))
         form.upload.data.save(filename)
         image = cv2.imread(filename)
-        #if selected_method == "gaussian":
-        #    smoothed_image = apply_gaussian_blur(image)
-        #elif selected_method == "median":
-       #     smoothed_image = apply_median_blur(image)
-        smoothed_image = apply_median_blur(image)
+        selected_method = (form.method.data)
+        if selected_method == "gaussian":
+            smoothed_image = apply_gaussian_blur(image)
+        elif selected_method == "median":
+            smoothed_image = apply_median_blur(image)
         smoothed_image_filename = f'{img_proc_dir}/result_' \
                        f'{form.upload.data.filename}'
         cv2.imwrite(smoothed_image_filename, smoothed_image)
