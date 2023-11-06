@@ -10,5 +10,5 @@ lxml==4.9.3
 numpy~=1.19.5
 opencv-python~=4.5
 wtforms~=3.0.0
-werkzeug~=2.0.3
+werkzeug~=>=2.2.2
 matplotlib~=3.3.4
