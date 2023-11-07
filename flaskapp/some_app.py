@@ -1,7 +1,7 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask import render_template
 from flask_wtf import FlaskForm,RecaptchaField
-from wtforms import StringField, SubmitField, TextAreaField, SelectField
+from wtforms import SubmitField, SelectField
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from flask_bootstrap import Bootstrap
 from werkzeug.utils import secure_filename
@@ -61,37 +61,30 @@ class NetForm(FlaskForm):
     recaptcha = RecaptchaField()
     submit = SubmitField('send')
 
-#@app.route("/net",methods=['GET', 'POST'])
-#def net():
-#    form = NetForm()
-#    filename=None
-#    neurodic = {}
-#    if form.validate_on_submit():
-#        filename = os.path.join('./static', secure_filename(form.upload.data.filename))
-#        fcount, fimage = neuronet.read_image_files(10,'./static')
-#        decode = neuronet.getresult(fimage)
-#        for elem in decode:
-#            neurodic[elem[0][1]] = elem[0][2]
-#        form.upload.data.save(filename)
-#    return render_template('net.html',form=form,image_name=filename,neurodic=neurodic)
-
 @app.route("/apinet",methods=['GET', 'POST'])
 def apinet():
-    if request.mimetype == 'application/json':
-       data = request.get_json()
-       filebytes = data['imagebin'].encode('utf-8')
-       cfile = base64.b64decode(filebytes)
-       img = Image.open(BytesIO(cfile))
-       decode = neuronet.getresult([img])
-       neurodic = {}
-       for elem in decode:
-           neurodic[elem[0][1]] = str(elem[0][2])
-           print(elem)
-       ret = json.dumps(neurodic)
-       resp = Response(response=ret,
-                   status = 200,
-                   mimetype = "application/json")
-       return resp
+    if request.is_json:
+        data = request.get_json()
+        if 'imagebin' in data:
+            filebytes = data['imagebin'].encode('utf-8')
+            cfile = base64.b64decode(filebytes)
+            img = Image.open(BytesIO(cfile))
+            decode = neuronet.getresult([img])
+            neurodic = {}
+            for elem in decode:
+                neurodic[elem[0][1]] = str(elem[0][2])
+                print(elem)
+            ret = json.dumps(neurodic)
+            resp = Response(response=ret,
+                            status=200,
+                            mimetype="application/json")
+            return resp
+        else:
+            error_message = {'error': 'The "imagebin" key is missing in the JSON data.'}
+            return jsonify(error_message), 400
+    else:
+        error_message = {'error': 'Invalid Content-Type. Please provide data in JSON format.'}
+        return jsonify(error_message), 400
 
 @app.route("/apixml",methods=['GET', 'POST'])
 def apixml():
