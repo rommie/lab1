@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 from flask import render_template
 from flask_wtf import FlaskForm,RecaptchaField
-from wtforms import SubmitField, SelectField
+from wtforms import StringField, SubmitField, TextAreaField, SelectField
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from flask_bootstrap import Bootstrap
 from werkzeug.utils import secure_filename
