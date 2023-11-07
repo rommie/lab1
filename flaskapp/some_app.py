@@ -28,20 +28,34 @@ app.config['RECAPTCHA_PRIVATE_KEY'] = os.getenv('RECAPTCHA_PRIVATE_KEY')
 app.config['RECAPTCHA_OPTIONS'] = {'theme': 'white'}
 bootstrap = Bootstrap(app)
 
+
 def generate_table_of_contents(app):
+    # Функция для генерации таблицы содержания, отображающей список доступных страниц приложения.
+    # Создание пустого списка для хранения информации о доступных маршрутах
     routes = []
+    # Перебор всех правил маршрутов в приложении
     for rule in app.url_map.iter_rules():
+        # Проверка, что маршрут поддерживает HTTP-метод "GET" и не относится к статическим файлам
         if "GET" in rule.methods and "static" not in rule.rule:
-            endpoint = rule.endpoint
-            path = rule.rule
+            endpoint = rule.endpoint  # Получение конечной точки маршрута
+            path = rule.rule  # Получение пути маршрута
+
+            # Если конечная точка не является "static", добавляем маршрут в список
             if endpoint != "static":
                 routes.append((endpoint, path))
 
+    # Создание HTML-кода для таблицы содержания
     table_of_contents = "<h1>List of Pages (Task variation 1)</h1><ul>"
+
+    # Для каждого маршрута в списке
     for endpoint, path in routes:
+        # Создание HTML-ссылки на маршрут
         table_of_contents += f'<li><a href="{path}">{endpoint}</a></li>'
+
+    # Завершение HTML-списка
     table_of_contents += "</ul>"
 
+    # Возврат сгенерированной таблицы содержания
     return table_of_contents
 
 
@@ -54,7 +68,12 @@ def data_to():
 
 
 class NetForm(FlaskForm):
+    #поле в котором появляется список методов для удаления шума
     method = SelectField('Select Blurring Method', choices=[('gaussian', 'Gaussian Blur'), ('median', 'Median Blur')])
+    # поле для введения строки, валидируется наличием данных
+    # валидатор проверяет введение данных после нажатия кнопки submit
+    # и указывает пользователю ввести данные, если они не введены
+    # или неверны
     upload = FileField('Load image', validators=[
         FileRequired(),
         FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')])
@@ -98,44 +117,57 @@ def apixml():
 
 @app.route("/bluring", methods=['GET', 'POST'])
 def bluring():
+    # Маршрут для обработки изображений с размытием, отображения гистограмм и вывода результатов на веб-страницу.
+
+    # Создание формы NetForm
     form = NetForm()
+
+    # Инициализация переменных для хранения путей к файлам и директории для обработки изображений
     filename = None
     smoothed_image_filename = None
     color_histogram_filename = None
     noise_histogram_filename = None
     img_proc_dir = './static/imgs_processing'
 
+    # Проверка существования директории для обработки изображений и удаление всех файлов в ней
     if not os.path.exists(img_proc_dir):
         os.makedirs(img_proc_dir)
     else:
         for fname in glob.glob(f'{img_proc_dir}/*'):
             os.remove(fname)
 
+    # Если форма была отправлена (POST-запрос) и прошла валидацию
     if form.validate_on_submit():
+        # Получение имени файла и сохранение его в директорию для обработки изображений
         filename = os.path.join(img_proc_dir, secure_filename(form.upload.data.filename))
         form.upload.data.save(filename)
         image = cv2.imread(filename)
+
+        # Получение выбранного метода обработки (гауссово размытие или медианный фильтр)
         selected_method = (form.method.data)
         if selected_method == "gaussian":
-            smoothed_image = apply_gaussian_blur(image)
+            smoothed_image = apply_gaussian_blur(image)  # Применение гауссового размытия
         elif selected_method == "median":
-            smoothed_image = apply_median_blur(image)
-        smoothed_image_filename = f'{img_proc_dir}/result_' \
-                       f'{form.upload.data.filename}'
+            smoothed_image = apply_median_blur(image)  # Применение медианного размытия
+
+        # Создание имени файла для сглаженного изображения и сохранение его
+        smoothed_image_filename = f'{img_proc_dir}/result_{form.upload.data.filename}'
         cv2.imwrite(smoothed_image_filename, smoothed_image)
 
-        color_histogram_filename = f'{img_proc_dir}/color_' \
-                       f'{form.upload.data.filename}'
-        color_distribution(image,color_histogram_filename)
+        # Создание имени файла для гистограммы цветового распределения и выполнение анализа
+        color_histogram_filename = f'{img_proc_dir}/color_{form.upload.data.filename}'
+        color_distribution(image, color_histogram_filename)
 
-        noise_histogram_filename = f'{img_proc_dir}/noise_' \
-                                   f'{form.upload.data.filename}'
+        # Создание имени файла для гистограммы шума и выполнение анализа
+        noise_histogram_filename = f'{img_proc_dir}/noise_{form.upload.data.filename}'
         generate_noise_histogram(image, smoothed_image, noise_histogram_filename)
 
+    # Отображение HTML-страницы с результатами
     return render_template('images.html', form=form, image=filename,
                            smoothed_image=smoothed_image_filename,
                            color_histogram=color_histogram_filename,
                            noise_histogram=noise_histogram_filename)
+
 
 @app.route("/")
 def hello():
